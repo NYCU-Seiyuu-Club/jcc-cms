@@ -1,52 +1,60 @@
 backend:
   name: github
-  repo: 你的GitHub帳號/你的主網站Repo名稱
+  # 1. 這裡請換成你「主網站 (Repo A)」的 GitHub 路徑 (例如: username/my-website)
+  repo: NYCU-Seiyuu-Club/jcc-cms
+  # 2. 確認你主網站的主分支名稱，如果是 master 請改為 master
   branch: main
+  base_url: https://jcc-cms.netlify.app
 
-# 圖片上傳的存放位置
-media_folder: "public/images/uploads"
-public_folder: "/images/uploads"
+media_folder: "public/images/announcements"
+public_folder: "/images/announcements"
 
 collections:
-  - name: "announcement"
+  - name: "announcements"
     label: "公告 (Announcements)"
-    folder: "content/announcements" # Markdown 檔案將存放的資料夾
+    folder: "content/announcements" # Markdown 檔案會寫入到主網站的這個資料夾
     create: true
     slug: "{{slug}}"
     fields:
-      - label: "網址代稱 (Slug)"
+      - label: "網址路徑 (Slug)"
         name: "slug"
         widget: "string"
-        hint: "例如: welcome-new-semester (建議只使用小寫英數字與橫線)"
+        hint: "請輸入英文小寫與橫線，例如: my-first-post"
+
       - label: "標題 (Title)"
         name: "title"
         widget: "string"
-      - label: "發布時間戳記 (Publish Time)"
+
+      - label: "系統發布時間 (Publish Timestamp)"
         name: "publishTimestamp"
         widget: "datetime"
-        format: "YYYY-MM-DD HH:mm:ss"
-        hint: "公告實際對外發布的時間"
+
       - label: "活動日期 (Date)"
         name: "date"
-        widget: "date"
+        widget: "datetime"
         format: "YYYY-MM-DD"
+        time_format: false  # 修正處：關閉時間選擇，只顯示日期
+
       - label: "分類 (Category)"
         name: "category"
         widget: "select"
         options: ["社課", "活動", "交流", "徵件"]
-        default: "社課"
+
       - label: "群組 (Group)"
         name: "group"
         widget: "select"
         options: ["UTAGE", "POPULAR", "TRADITION", "GEO"]
+
       - label: "封面圖片 (Cover Image)"
         name: "coverImage"
         widget: "image"
         required: false
+
       - label: "摘要 (Summary)"
         name: "summary"
         widget: "text"
-        hint: "顯示在首頁或列表頁的簡短敘述"
-      - label: "內文 (Content)"
+        required: false
+
+      - label: "內文 (Body)"
         name: "body"
         widget: "markdown"
