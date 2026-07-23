@@ -7,6 +7,9 @@ media_folder: "public/images/announcements"
 public_folder: "/images/announcements"
 
 collections:
+  # =========================================
+  # 1. 公告 (Announcements)
+  # =========================================
   - name: "announcements"
     label: "公告 (Announcements)"
     folder: "src/data/announcements"
@@ -25,6 +28,7 @@ collections:
       - label: "系統發布時間 (Publish Timestamp)"
         name: "publishTimestamp"
         widget: "hidden"
+        default: ""
 
       - label: "活動日期 (Date)"
         name: "date"
@@ -40,6 +44,60 @@ collections:
         name: "group"
         widget: "select"
         options: ["NONE","UTAGE", "POPULAR", "TRADITION", "GEO"]
+        required: false
+
+      - label: "封面圖片 (Cover Image)"
+        name: "coverImage"
+        widget: "image"
+        required: false
+
+      - label: "摘要 (Summary)"
+        name: "summary"
+        widget: "text"
+        required: false
+
+      - label: "內文 (Body)"
+        name: "body"
+        widget: "markdown"
+
+  # =========================================
+  # 2. 日誌 (Journals)
+  # =========================================
+  - name: "journals"
+    label: "日誌 (Journals)"
+    folder: "src/data/journals"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - label: "網址路徑 (Slug)"
+        name: "slug"
+        widget: "string"
+        hint: "請輸入英文小寫與橫線，例如: my-first-journal"
+
+      - label: "標題 (Title)"
+        name: "title"
+        widget: "string"
+
+      - label: "系統發布時間 (Publish Timestamp)"
+        name: "publishTimestamp"
+        widget: "hidden"
+        default: ""
+
+      - label: "活動日期 (Date)"
+        name: "date"
+        widget: "datetime"
+        format: "YYYY-MM-DD HH:mm:ss"
+
+      - label: "分類 (Category)"
+        name: "category"
+        widget: "select"
+        options: ["社課", "活動"]
+
+      - label: "群組 (Group)"
+        name: "group"
+        widget: "select"
+        options: ["NONE", "UTAGE", "POPULAR", "TRADITION", "GEO"]
+        required: false
 
       - label: "封面圖片 (Cover Image)"
         name: "coverImage"
