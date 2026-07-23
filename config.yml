@@ -24,13 +24,12 @@ collections:
 
       - label: "系統發布時間 (Publish Timestamp)"
         name: "publishTimestamp"
-        widget: "datetime"
+        widget: "hidden"
 
       - label: "活動日期 (Date)"
         name: "date"
         widget: "datetime"
-        format: "YYYY-MM-DD"
-        time_format: false
+        format: "YYYY-MM-DD HH:mm:ss"
 
       - label: "分類 (Category)"
         name: "category"
@@ -40,7 +39,7 @@ collections:
       - label: "群組 (Group)"
         name: "group"
         widget: "select"
-        options: ["UTAGE", "POPULAR", "TRADITION", "GEO"]
+        options: ["NONE","UTAGE", "POPULAR", "TRADITION", "GEO"]
 
       - label: "封面圖片 (Cover Image)"
         name: "coverImage"
