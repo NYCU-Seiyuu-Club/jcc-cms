@@ -27,9 +27,8 @@ collections:
 
       - label: "系統發布時間 (Publish Timestamp)"
         name: "publishTimestamp"
-        widget: "string"
-        required: false
-        hint: "系統會在存檔時自動填寫，請勿手動修改"
+        widget: "hidden"
+        default: ""
 
       - label: "活動日期 (Date)"
         name: "date"
@@ -81,9 +80,8 @@ collections:
 
       - label: "系統發布時間 (Publish Timestamp)"
         name: "publishTimestamp"
-        widget: "string"
-        required: false
-        hint: "系統會在存檔時自動填寫，請勿手動修改"
+        widget: "hidden"
+        default: ""
 
       - label: "活動日期 (Date)"
         name: "date"
@@ -93,7 +91,7 @@ collections:
       - label: "分類 (Category)"
         name: "category"
         widget: "select"
-        options: ["社課", "活動"]
+        options: ["社課", "活動", "交流"]
 
       - label: "群組 (Group)"
         name: "group"
