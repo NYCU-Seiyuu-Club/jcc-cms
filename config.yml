@@ -1,0 +1,52 @@
+backend:
+  name: github
+  repo: 你的GitHub帳號/你的主網站Repo名稱
+  branch: main
+
+# 圖片上傳的存放位置
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+collections:
+  - name: "announcement"
+    label: "公告 (Announcements)"
+    folder: "content/announcements" # Markdown 檔案將存放的資料夾
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - label: "網址代稱 (Slug)"
+        name: "slug"
+        widget: "string"
+        hint: "例如: welcome-new-semester (建議只使用小寫英數字與橫線)"
+      - label: "標題 (Title)"
+        name: "title"
+        widget: "string"
+      - label: "發布時間戳記 (Publish Time)"
+        name: "publishTimestamp"
+        widget: "datetime"
+        format: "YYYY-MM-DD HH:mm:ss"
+        hint: "公告實際對外發布的時間"
+      - label: "活動日期 (Date)"
+        name: "date"
+        widget: "date"
+        format: "YYYY-MM-DD"
+      - label: "分類 (Category)"
+        name: "category"
+        widget: "select"
+        options: ["社課", "活動", "交流", "徵件"]
+        default: "社課"
+      - label: "群組 (Group)"
+        name: "group"
+        widget: "select"
+        options: ["UTAGE", "POPULAR", "TRADITION", "GEO"]
+      - label: "封面圖片 (Cover Image)"
+        name: "coverImage"
+        widget: "image"
+        required: false
+      - label: "摘要 (Summary)"
+        name: "summary"
+        widget: "text"
+        hint: "顯示在首頁或列表頁的簡短敘述"
+      - label: "內文 (Content)"
+        name: "body"
+        widget: "markdown"
