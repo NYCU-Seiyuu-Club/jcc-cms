@@ -3,9 +3,6 @@ backend:
   repo: NYCU-Seiyuu-Club/nycu-jcc-website
   branch: main
 
-editor:
-  preview: false
-
 media_folder: "public/images/announcements"
 public_folder: "/images/announcements"
 
@@ -30,8 +27,9 @@ collections:
 
       - label: "系統發布時間 (Publish Timestamp)"
         name: "publishTimestamp"
-        widget: "hidden"
-        default: ""
+        widget: "string"
+        required: false
+        hint: "系統會在存檔時自動填寫，請勿手動修改"
 
       - label: "活動日期 (Date)"
         name: "date"
@@ -83,8 +81,9 @@ collections:
 
       - label: "系統發布時間 (Publish Timestamp)"
         name: "publishTimestamp"
-        widget: "hidden"
-        default: ""
+        widget: "string"
+        required: false
+        hint: "系統會在存檔時自動填寫，請勿手動修改"
 
       - label: "活動日期 (Date)"
         name: "date"
