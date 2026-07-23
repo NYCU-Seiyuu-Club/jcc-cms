@@ -1,10 +1,7 @@
 backend:
   name: github
-  # 1. 這裡請換成你「主網站 (Repo A)」的 GitHub 路徑 (例如: username/my-website)
-  repo: NYCU-Seiyuu-Club/jcc-cms
-  # 2. 確認你主網站的主分支名稱，如果是 master 請改為 master
+  repo: NYCU-Seiyuu-Club/nycu-jcc-website
   branch: main
-  base_url: https://jcc-cms.netlify.app
 
 media_folder: "public/images/announcements"
 public_folder: "/images/announcements"
@@ -12,7 +9,7 @@ public_folder: "/images/announcements"
 collections:
   - name: "announcements"
     label: "公告 (Announcements)"
-    folder: "content/announcements" # Markdown 檔案會寫入到主網站的這個資料夾
+    folder: "content/announcements"
     create: true
     slug: "{{slug}}"
     fields:
@@ -33,7 +30,7 @@ collections:
         name: "date"
         widget: "datetime"
         format: "YYYY-MM-DD"
-        time_format: false  # 修正處：關閉時間選擇，只顯示日期
+        time_format: false
 
       - label: "分類 (Category)"
         name: "category"
