@@ -3,9 +3,6 @@ backend:
   repo: NYCU-Seiyuu-Club/nycu-jcc-website
   branch: main
 
-media_folder: "public/images/announcements"
-public_folder: "/images/announcements"
-
 collections:
   # =========================================
   # 1. 公告 (Announcements)
@@ -15,6 +12,8 @@ collections:
     folder: "src/data/announcements"
     create: true
     slug: "{{slug}}"
+    media_folder: "public/images/announcements"
+    public_folder: "/images/announcements"
     fields:
       - label: "網址路徑 (Slug)"
         name: "slug"
@@ -59,6 +58,8 @@ collections:
       - label: "內文 (Body)"
         name: "body"
         widget: "markdown"
+        media_folder: "/public/images/announcements/{{slug}}"
+        public_folder: "/images/announcements/{{slug}}"
 
   # =========================================
   # 2. 日誌 (Journals)
@@ -68,6 +69,8 @@ collections:
     folder: "src/data/journals"
     create: true
     slug: "{{slug}}"
+    media_folder: "public/images/journals"
+    public_folder: "/images/journals"
     fields:
       - label: "網址路徑 (Slug)"
         name: "slug"
@@ -112,3 +115,5 @@ collections:
       - label: "內文 (Body)"
         name: "body"
         widget: "markdown"
+        media_folder: "/public/images/journals/{{slug}}"
+        public_folder: "/images/journals/{{slug}}"
