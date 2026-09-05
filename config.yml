@@ -35,7 +35,18 @@ collections:
       - label: "活動日期 (Date)"
         name: "date"
         widget: "datetime"
-        format: "YYYY/MM/DD HH:mm:ss"
+        required: false
+        format: "YYYY-MM-DD"
+        date_format: "YYYY/MM/DD"
+        time_format: false
+        hint: "選填；沒有確定活動日期時可留空。"
+
+      - label: "活動時間 (Time)"
+        name: "time"
+        widget: "string"
+        required: false
+        hint: "選填；請使用 24 小時制，例如 19:30。只有日期時可留空。"
+        pattern: ["^(?:[01]\\d|2[0-3]):[0-5]\\d$", "時間格式請使用 HH:mm，例如 19:30"]
 
       - label: "分類 (Category)"
         name: "category"
@@ -82,6 +93,12 @@ collections:
         name: "title"
         widget: "string"
 
+      - label: "作者 (Author)"
+        name: "author"
+        widget: "string"
+        required: false
+        hint: "選填；填寫後會顯示在 Journal 卡片與文章頁。"
+
       - label: "發布設定 (Publish Schedule)"
         name: "publishTimestamp"
         widget: "publish-schedule"
@@ -91,7 +108,18 @@ collections:
       - label: "活動日期 (Date)"
         name: "date"
         widget: "datetime"
-        format: "YYYY/MM/DD HH:mm:ss"
+        required: false
+        format: "YYYY-MM-DD"
+        date_format: "YYYY/MM/DD"
+        time_format: false
+        hint: "選填；沒有確定活動日期時可留空。"
+
+      - label: "活動時間 (Time)"
+        name: "time"
+        widget: "string"
+        required: false
+        hint: "選填；請使用 24 小時制，例如 19:30。只有日期時可留空。"
+        pattern: ["^(?:[01]\\d|2[0-3]):[0-5]\\d$", "時間格式請使用 HH:mm，例如 19:30"]
 
       - label: "分類 (Category)"
         name: "category"
