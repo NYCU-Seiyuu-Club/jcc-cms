@@ -28,22 +28,7 @@
     <meta name="twitter:image" content="logo.webp" />
   </head>
   <body>
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-
-    <script>
-          CMS.registerEventListener({
-            name: 'preSave',
-            handler: ({ entry }) => {
-              const currentData = entry.get('data');
-
-              const now = new Date();
-              const utc8Time = new Date(now.getTime() + (8 * 60 * 60 * 1000));
-              const timestamp = utc8Time.toISOString().replace('Z', '+08:00');
-
-              const newData = currentData.set('publishTimestamp', timestamp);
-              return newData;
-            },
-          });
-        </script>
+    <script src="https://unpkg.com/decap-cms@3.15.1/dist/decap-cms.js"></script>
+    <script src="publish-schedule.js"></script>
   </body>
 </html>

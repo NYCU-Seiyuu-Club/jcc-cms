@@ -3,7 +3,7 @@ backend:
   repo: NYCU-Seiyuu-Club/nycu-jcc-website
   branch: main
 
-media_folder: "public/images/announcements"
+media_folder: "content-media/announcements"
 public_folder: "/images/announcements"
 
 collections:
@@ -25,10 +25,11 @@ collections:
         name: "title"
         widget: "string"
 
-      - label: "系統發布時間 (Publish Timestamp)"
+      - label: "發布設定 (Publish Schedule)"
         name: "publishTimestamp"
-        widget: "hidden"
+        widget: "publish-schedule"
         default: ""
+        hint: "可選擇立即發布，或使用台北時間排程（須至少提前 10 分鐘）。"
 
       - label: "活動日期 (Date)"
         name: "date"
@@ -78,10 +79,11 @@ collections:
         name: "title"
         widget: "string"
 
-      - label: "系統發布時間 (Publish Timestamp)"
+      - label: "發布設定 (Publish Schedule)"
         name: "publishTimestamp"
-        widget: "hidden"
+        widget: "publish-schedule"
         default: ""
+        hint: "可選擇立即發布，或使用台北時間排程（須至少提前 10 分鐘）。"
 
       - label: "活動日期 (Date)"
         name: "date"
