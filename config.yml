@@ -3,7 +3,7 @@ backend:
   repo: NYCU-Seiyuu-Club/nycu-jcc-website
   branch: main
 
-media_folder: "content-media/announcements"
+media_folder: "public/images/announcements"
 public_folder: "/images/announcements"
 
 collections:
