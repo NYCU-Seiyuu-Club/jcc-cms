@@ -100,6 +100,21 @@
     }
   }
 
+  // atob/btoa are Latin1-only; the markdown files here contain Chinese text,
+  // so round-tripping through GitHub's base64 content needs real UTF-8 codecs.
+  function base64ToUtf8(base64) {
+    const binary = atob(base64.replace(/\n/g, ''));
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+
+  function utf8ToBase64(text) {
+    const bytes = new TextEncoder().encode(text);
+    let binary = '';
+    for (const byte of bytes) binary += String.fromCharCode(byte);
+    return btoa(binary);
+  }
+
   async function githubRequest(path, options, token) {
     const response = await fetch(`${API_ROOT}${path}`, {
       ...options,
@@ -116,9 +131,13 @@
     return response.status === 204 ? null : response.json();
   }
 
-  // Renames every managed image to its planned path in a single extra commit
-  // (one tree update covering all renames), instead of one commit per file.
-  async function applyRenames(renames) {
+  // Renames every managed image and rewrites the entry's own markdown file to
+  // match, all as one follow-up commit. Runs from postSave (after Decap has
+  // already committed the entry + any freshly-picked images together), because
+  // images added via the inline field control are NOT committed separately at
+  // upload time — they ride along in the same commit as the entry save, so a
+  // preSave-time GitHub API lookup for them 404s and finds nothing to rename.
+  async function applyRenamesAndPatchEntry({ entryPath, renames }) {
     if (renames.length === 0) return;
     const token = getToken();
     if (!token) throw new Error('找不到 CMS 登入權杖，無法重新命名圖片。');
@@ -139,7 +158,10 @@
         { method: 'GET' },
         token,
       ).catch(() => null);
-      if (!oldFile || !oldFile.sha) continue; // already gone or not tracked in git — nothing to rename
+      if (!oldFile || !oldFile.sha) {
+        console.warn(`[media-rename] 找不到圖片，略過改名: ${oldRepoPath}`);
+        continue;
+      }
 
       const existingTarget = await githubRequest(
         `/repos/${REPO}/contents/${encodeGitPath(newRepoPath)}?ref=${BRANCH}`,
@@ -156,6 +178,27 @@
     }
 
     if (treeEntries.length === 0) return;
+
+    const entryRepoPath = entryPath;
+    const entryFile = await githubRequest(
+      `/repos/${REPO}/contents/${encodeGitPath(entryRepoPath)}?ref=${BRANCH}`,
+      { method: 'GET' },
+      token,
+    );
+    let entryText = base64ToUtf8(entryFile.content);
+    for (const { from, to } of renames) {
+      entryText = entryText.split(from).join(to);
+    }
+    const entryBlob = await githubRequest(
+      `/repos/${REPO}/git/blobs`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: utf8ToBase64(entryText), encoding: 'base64' }),
+      },
+      token,
+    );
+    treeEntries.push({ path: entryRepoPath, mode: '100644', type: 'blob', sha: entryBlob.sha });
 
     const newTree = await githubRequest(
       `/repos/${REPO}/git/trees`,
@@ -193,28 +236,23 @@
   }
 
   CMS.registerEventListener({
-    name: 'preSave',
+    name: 'postSave',
     handler: async ({ entry }) => {
       const data = entry.get('data');
       const slug = data.get('slug');
       const coverImage = data.get('coverImage');
       const body = data.get('body');
+      const entryPath = entry.get('path');
 
-      const { renames, nextCoverImage, nextBody } = planRenames({ slug, coverImage, body });
-      if (renames.length === 0) return data;
+      const { renames } = planRenames({ slug, coverImage, body });
+      if (renames.length === 0 || !entryPath) return;
 
       try {
-        await applyRenames(renames);
+        await applyRenamesAndPatchEntry({ entryPath, renames });
       } catch (error) {
-        console.error('[media-rename] 圖片重新命名失敗，將以原始檔名儲存內容：', error);
-        window.alert('圖片依 slug 重新命名失敗（內文仍會正常儲存，圖片檔名維持原樣）。詳情請見瀏覽器主控台。');
-        return data;
+        console.error('[media-rename] 圖片重新命名失敗，圖片檔名維持原樣：', error);
+        window.alert('圖片依 slug 重新命名失敗（內文已正常儲存，圖片檔名維持原樣）。詳情請見瀏覽器主控台。');
       }
-
-      let nextData = data;
-      if (nextCoverImage !== coverImage) nextData = nextData.set('coverImage', nextCoverImage);
-      if (nextBody !== body) nextData = nextData.set('body', nextBody);
-      return nextData;
     },
   });
 

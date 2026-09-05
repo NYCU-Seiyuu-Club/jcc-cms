@@ -90,7 +90,7 @@ test('ignores unmanaged paths and invalid slugs', () => {
   assert.equal(invalidSlug.nextCoverImage, '/images/announcements/special.jpg');
 });
 
-test('registers a preSave listener', () => {
+test('registers a postSave listener', () => {
   assert.equal(registeredListeners.length, 1);
-  assert.equal(registeredListeners[0].name, 'preSave');
+  assert.equal(registeredListeners[0].name, 'postSave');
 });
