@@ -56,7 +56,7 @@ collections:
         name: "summary"
         widget: "text"
         required: false
-        pattern: ["^[\\s\\S]{0,40}$", "摘要請勿超過 40 字"]
+        pattern: ["^[\\s\\S]{0,60}$", "摘要請勿超過 60 字"]
 
       - label: "內文 (Body)"
         name: "body"
@@ -111,7 +111,7 @@ collections:
         name: "summary"
         widget: "text"
         required: false
-        pattern: ["^[\\s\\S]{0,40}$", "摘要請勿超過 40 字"]
+        pattern: ["^[\\s\\S]{0,60}$", "摘要請勿超過 60 字"]
 
       - label: "內文 (Body)"
         name: "body"
