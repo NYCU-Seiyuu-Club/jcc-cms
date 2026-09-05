@@ -3,7 +3,11 @@
   const BRANCH = 'main';
   const API_ROOT = 'https://api.github.com';
   const IMAGES_PREFIX = '/images/announcements/';
-  const SLUG_PATTERN = /^[a-z0-9-]+$/;
+  const SLUG_PATTERN = /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/;
+  const COLLECTION_FOLDERS = {
+    announcements: 'src/data/announcements',
+    journals: 'src/data/journals',
+  };
 
   function isManagedPath(path) {
     return typeof path === 'string' && path.startsWith(IMAGES_PREFIX);
@@ -90,6 +94,16 @@
     return repoPath.split('/').map(encodeURIComponent).join('/');
   }
 
+  function resolveEntryPath(entry, slug) {
+    const existingPath = entry.get('path');
+    if (typeof existingPath === 'string' && existingPath) {
+      return existingPath.replace(/\\/g, '/');
+    }
+
+    const folder = COLLECTION_FOLDERS[entry.get('collection')];
+    return folder && SLUG_PATTERN.test(slug || '') ? `${folder}/${slug}.md` : null;
+  }
+
   function getToken() {
     try {
       const raw = window.localStorage.getItem('decap-cms-user');
@@ -115,6 +129,14 @@
     return btoa(binary);
   }
 
+  class GitHubRequestError extends Error {
+    constructor(status, path, responseText) {
+      super(`GitHub API ${status} ${path}: ${responseText}`);
+      this.name = 'GitHubRequestError';
+      this.status = status;
+    }
+  }
+
   async function githubRequest(path, options, token) {
     const response = await fetch(`${API_ROOT}${path}`, {
       ...options,
@@ -125,10 +147,19 @@
       },
     });
     if (!response.ok) {
-      const text = await response.text().catch(() => '');
-      throw new Error(`GitHub API ${response.status} ${path}: ${text}`);
+      const responseText = await response.text().catch(() => '');
+      throw new GitHubRequestError(response.status, path, responseText);
     }
     return response.status === 204 ? null : response.json();
+  }
+
+  async function githubRequestOrNull(path, options, token) {
+    try {
+      return await githubRequest(path, options, token);
+    } catch (error) {
+      if (error && error.status === 404) return null;
+      throw error;
+    }
   }
 
   // Renames every managed image and rewrites the entry's own markdown file to
@@ -147,37 +178,8 @@
     const baseCommit = await githubRequest(`/repos/${REPO}/git/commits/${baseCommitSha}`, { method: 'GET' }, token);
     const baseTreeSha = baseCommit.tree.sha;
 
-    const treeEntries = [];
-    for (const { from, to } of renames) {
-      if (from === to) continue;
-      const oldRepoPath = toRepoPath(from);
-      const newRepoPath = toRepoPath(to);
-
-      const oldFile = await githubRequest(
-        `/repos/${REPO}/contents/${encodeGitPath(oldRepoPath)}?ref=${BRANCH}`,
-        { method: 'GET' },
-        token,
-      ).catch(() => null);
-      if (!oldFile || !oldFile.sha) {
-        console.warn(`[media-rename] 找不到圖片，略過改名: ${oldRepoPath}`);
-        continue;
-      }
-
-      const existingTarget = await githubRequest(
-        `/repos/${REPO}/contents/${encodeGitPath(newRepoPath)}?ref=${BRANCH}`,
-        { method: 'GET' },
-        token,
-      ).catch(() => null);
-      if (existingTarget && existingTarget.sha !== oldFile.sha) {
-        console.warn(`[media-rename] 跳過改名，目標檔案已存在且內容不同: ${newRepoPath}`);
-        continue;
-      }
-
-      treeEntries.push({ path: newRepoPath, mode: '100644', type: 'blob', sha: oldFile.sha });
-      treeEntries.push({ path: oldRepoPath, mode: '100644', type: 'blob', sha: null });
-    }
-
-    if (treeEntries.length === 0) return;
+    const moves = renames.filter(({ from, to }) => from !== to);
+    if (moves.length === 0) return;
 
     const entryRepoPath = entryPath;
     const entryFile = await githubRequest(
@@ -186,9 +188,44 @@
       token,
     );
     let entryText = base64ToUtf8(entryFile.content);
-    for (const { from, to } of renames) {
-      entryText = entryText.split(from).join(to);
+    const missingReference = moves.find(({ from }) => !entryText.includes(from));
+    if (missingReference) {
+      throw new Error(`文章內容找不到待改名圖片：${missingReference.from}`);
     }
+
+    const preparedMoves = [];
+    for (const { from, to } of moves) {
+      const oldRepoPath = toRepoPath(from);
+      const newRepoPath = toRepoPath(to);
+
+      const oldFile = await githubRequestOrNull(
+        `/repos/${REPO}/contents/${encodeGitPath(oldRepoPath)}?ref=${BRANCH}`,
+        { method: 'GET' },
+        token,
+      );
+      if (!oldFile || !oldFile.sha) {
+        throw new Error(`找不到待改名圖片：${oldRepoPath}`);
+      }
+
+      const existingTarget = await githubRequestOrNull(
+        `/repos/${REPO}/contents/${encodeGitPath(newRepoPath)}?ref=${BRANCH}`,
+        { method: 'GET' },
+        token,
+      );
+      if (existingTarget && existingTarget.sha !== oldFile.sha) {
+        throw new Error(`目標檔名已被其他圖片使用：${newRepoPath}`);
+      }
+
+      preparedMoves.push({ from, to, oldRepoPath, newRepoPath, sha: oldFile.sha });
+    }
+
+    const treeEntries = [];
+    for (const move of preparedMoves) {
+      treeEntries.push({ path: move.newRepoPath, mode: '100644', type: 'blob', sha: move.sha });
+      treeEntries.push({ path: move.oldRepoPath, mode: '100644', type: 'blob', sha: null });
+      entryText = entryText.split(move.from).join(move.to);
+    }
+
     const entryBlob = await githubRequest(
       `/repos/${REPO}/git/blobs`,
       {
@@ -229,7 +266,7 @@
       {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sha: newCommit.sha }),
+        body: JSON.stringify({ sha: newCommit.sha, force: false }),
       },
       token,
     );
@@ -242,12 +279,13 @@
       const slug = data.get('slug');
       const coverImage = data.get('coverImage');
       const body = data.get('body');
-      const entryPath = entry.get('path');
 
       const { renames } = planRenames({ slug, coverImage, body });
-      if (renames.length === 0 || !entryPath) return;
+      if (renames.length === 0) return;
 
       try {
+        const entryPath = resolveEntryPath(entry, slug);
+        if (!entryPath) throw new Error('無法判斷文章在儲存庫中的路徑。');
         await applyRenamesAndPatchEntry({ entryPath, renames });
       } catch (error) {
         console.error('[media-rename] 圖片重新命名失敗，圖片檔名維持原樣：', error);
@@ -256,5 +294,5 @@
     },
   });
 
-  window.JCCMediaRename = { planRenames };
+  window.JCCMediaRename = { planRenames, resolveEntryPath };
 })();

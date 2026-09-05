@@ -14,12 +14,13 @@ collections:
     label: "公告 (Announcements)"
     folder: "src/data/announcements"
     create: true
-    slug: "{{slug}}"
+    slug: "{{fields.slug}}"
     fields:
       - label: "網址路徑 (Slug)"
         name: "slug"
         widget: "string"
-        hint: "請輸入英文小寫與橫線，例如: my-first-post"
+        hint: "請輸入英文小寫、數字、橫線或底線，例如: my-first-post"
+        pattern: ["^[a-z0-9]+(?:[-_][a-z0-9]+)*$", "Slug 只能使用英文小寫、數字、橫線或底線，且不能連續或放在開頭結尾"]
 
       - label: "標題 (Title)"
         name: "title"
@@ -69,12 +70,13 @@ collections:
     label: "日誌 (Journals)"
     folder: "src/data/journals"
     create: true
-    slug: "{{slug}}"
+    slug: "{{fields.slug}}"
     fields:
       - label: "網址路徑 (Slug)"
         name: "slug"
         widget: "string"
-        hint: "請輸入英文小寫與橫線，例如: my-first-journal"
+        hint: "請輸入英文小寫、數字、橫線或底線，例如: my-first-journal"
+        pattern: ["^[a-z0-9]+(?:[-_][a-z0-9]+)*$", "Slug 只能使用英文小寫、數字、橫線或底線，且不能連續或放在開頭結尾"]
 
       - label: "標題 (Title)"
         name: "title"
